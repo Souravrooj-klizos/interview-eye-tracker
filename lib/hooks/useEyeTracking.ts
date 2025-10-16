@@ -82,8 +82,8 @@ export const useEyeTracking = (
   };
 
   const isLookingAway = useCallback((gazeDirection: { x: number; y: number }) => {
-    // Threshold for determining if user is looking away
-    const GAZE_THRESHOLD = 0.15;
+    // Threshold for determining if user is looking away (lower = more sensitive)
+    const GAZE_THRESHOLD = 0.08;
     
     const distance = Math.sqrt(gazeDirection.x ** 2 + gazeDirection.y ** 2);
     return distance > GAZE_THRESHOLD;
@@ -120,11 +120,11 @@ export const useEyeTracking = (
         lookAwayCountRef.current = Math.max(0, lookAwayCountRef.current - 1);
       }
 
-      // Trigger callback if consistently looking away
-      if (lookAwayCountRef.current > 5) {
+      // Trigger callback if consistently looking away (reduced threshold)
+      if (lookAwayCountRef.current > 2) {
         const result: EyeTrackingResult = {
           isLookingAway: true,
-          confidence: Math.min(0.9, lookAwayCountRef.current / 10),
+          confidence: Math.min(0.9, lookAwayCountRef.current / 5),
           gazeDirection
         };
         onLookingAway(result);

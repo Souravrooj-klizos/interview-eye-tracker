@@ -9,9 +9,21 @@ export async function POST(request: NextRequest) {
   try {
     await connectDB();
     
-    const formData = await request.formData();
-    const videoFile = formData.get('video') as File;
-    const interviewId = formData.get('interviewId') as string;
+    let formData;
+    let videoFile;
+    let interviewId;
+    
+    try {
+      formData = await request.formData();
+      videoFile = formData.get('video') as File;
+      interviewId = formData.get('interviewId') as string;
+    } catch (formDataError) {
+      console.error('FormData parsing error:', formDataError);
+      return NextResponse.json(
+        { error: "Invalid form data format" },
+        { status: 400 }
+      );
+    }
     
     if (!videoFile || !interviewId) {
       return NextResponse.json(
