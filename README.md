@@ -2,6 +2,8 @@
 
 A professional Next.js 14 application for conducting interviews with real-time eye tracking and video recording capabilities.
 
+🚀 **Live Demo**: Deployed on Vercel
+
 ## 🚀 Features
 
 - **Real-time Eye Tracking**: Uses MediaPipe FaceMesh to detect when users look away from the screen
