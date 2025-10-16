@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "functions": {
+    "app/api/upload/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "MONGO_URI": "@mongo_uri",
+    "NEXT_PUBLIC_API_URL": "@next_public_api_url"
+  }
+}
