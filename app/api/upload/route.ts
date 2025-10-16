@@ -76,10 +76,4 @@ export async function POST(request: NextRequest) {
 }
 
 // Configure the API route to handle large files
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb',
-    },
-  },
-}
+export const maxDuration = 30;
