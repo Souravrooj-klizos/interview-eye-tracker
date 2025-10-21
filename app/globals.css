@@ -49,6 +49,18 @@
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  .bg-warning-50 {
+    background-color: rgb(255 251 235);
+  }
+
+  .border-warning-200 {
+    border-color: rgb(254 215 170);
+  }
+
+  .text-warning-800 {
+    color: rgb(146 64 14);
+  }
   
   .warning-banner {
     background-color: rgb(254 242 242);

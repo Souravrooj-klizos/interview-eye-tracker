@@ -9,7 +9,10 @@ const nextConfig = {
       topLevelAwait: true,
     }
     return config
-  }
+  },
+  // Suppress hydration warnings from browser extensions
+  reactStrictMode: true,
+  swcMinify: true,
 }
 
 module.exports = nextConfig

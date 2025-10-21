@@ -19,6 +19,8 @@ export default function InterviewRecorder() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
+  const [forceFallback, setForceFallback] = useState(false);
   const [userId] = useState(() => `user_${Date.now()}`); // Simple user ID generation
 
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -75,7 +77,7 @@ export default function InterviewRecorder() {
     }
   }, [interviewSession]);
 
-  const { isTracking, startTracking, stopTracking } = useEyeTracking(videoRef, handleLookingAway);
+  const { isTracking, startTracking, stopTracking, trackingMethod, error: trackingError } = useEyeTracking(videoRef, handleLookingAway);
 
   const initializeCamera = useCallback(async () => {
     try {
@@ -145,6 +147,16 @@ export default function InterviewRecorder() {
 
       // Start eye tracking
       await startTracking();
+      
+      // If tracking failed, try fallback after a delay
+      setTimeout(async () => {
+        if (!isTracking) {
+          console.log('MediaPipe failed, trying fallback...');
+          setForceFallback(true);
+          // Force reinitialize with fallback
+          window.location.reload();
+        }
+      }, 5000);
 
       console.log('🎬 Interview started:', session);
     } catch (error) {
@@ -271,6 +283,13 @@ export default function InterviewRecorder() {
           </div>
         )}
 
+        {/* Tracking Error Banner */}
+        {trackingError && (
+          <div className="bg-warning-50 border border-warning-200 text-warning-800 px-6 py-3 mx-6 mt-4 rounded-lg">
+            <span className="font-semibold">Tracking Warning:</span> {trackingError}
+          </div>
+        )}
+
         {/* Video Preview */}
         <div className="p-6">
           <div className="relative bg-gray-900 rounded-lg overflow-hidden mb-6">
@@ -295,7 +314,7 @@ export default function InterviewRecorder() {
               <div className="absolute top-4 right-4 flex items-center gap-2 bg-primary-600 text-white px-3 py-1 rounded-full">
                 <div className="w-2 h-2 bg-white rounded-full"></div>
                 <span className="text-sm font-medium">
-                  {isTracking ? 'Eye Tracking Active' : 'Initializing...'}
+                  {isTracking ? `Eye Tracking (${trackingMethod || 'Unknown'})` : 'Initializing...'}
                 </span>
               </div>
             )}
@@ -357,6 +376,72 @@ export default function InterviewRecorder() {
               </div>
             </div>
           )}
+
+          {/* Debug Panel */}
+          {debugMode && (
+            <div className="mt-6 bg-gray-100 rounded-lg p-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-semibold">Debug Information</h3>
+                <button
+                  onClick={() => setDebugMode(false)}
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Hide Debug
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <strong>Tracking Method:</strong> {trackingMethod || 'None'}
+                </div>
+                <div>
+                  <strong>Is Tracking:</strong> {isTracking ? 'Yes' : 'No'}
+                </div>
+                <div>
+                  <strong>Camera Stream:</strong> {stream ? 'Active' : 'Inactive'}
+                </div>
+                <div>
+                  <strong>Video Element:</strong> {videoRef.current ? 'Ready' : 'Not Ready'}
+                </div>
+                {trackingError && (
+                  <div className="col-span-2">
+                    <strong>Tracking Error:</strong> {trackingError}
+                  </div>
+                )}
+                <div className="col-span-2">
+                  <button
+                    onClick={() => {
+                      console.log('Forcing fallback mode...');
+                      localStorage.setItem('forceFallback', 'true');
+                      window.location.reload();
+                    }}
+                    className="px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
+                  >
+                    Force Fallback Mode
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log('Resetting to MediaPipe...');
+                      localStorage.removeItem('forceFallback');
+                      window.location.reload();
+                    }}
+                    className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 ml-2"
+                  >
+                    Reset to MediaPipe
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Debug Toggle */}
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => setDebugMode(!debugMode)}
+              className="text-sm text-gray-500 hover:text-gray-700 underline"
+            >
+              {debugMode ? 'Hide Debug Info' : 'Show Debug Info'}
+            </button>
+          </div>
         </div>
 
         {/* Footer */}
